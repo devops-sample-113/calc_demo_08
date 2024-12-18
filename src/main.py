@@ -1,6 +1,8 @@
 import flet as ft
+import math
 from calculate import Calculator
 from buttons import DigitButton, OperatorButton, ActionButton
+
 
 
 class CalculatorApp(ft.Container):
@@ -18,6 +20,17 @@ class CalculatorApp(ft.Container):
         self.clac = Calculator()
         self.calculate = self.clac.calculate
         self.content = self.ui()
+
+    def root(self):
+        term = int(self.result.value)
+        if(term == 0):
+            return 1
+        elif(term > 0):
+            fact = 1
+            while term > 1:
+                fact *= term
+                term -= 1
+            return fact
 
     def ui(self):
         ui = ft.Column(
@@ -98,12 +111,26 @@ class CalculatorApp(ft.Container):
                         DigitButton(
                             text="0", expand=1, button_clicked=self.button_clicked, value=0
                         ),
-                        DigitButton(
-                            text=".", button_clicked=self.button_clicked, value="."),
+                        ActionButton(
+                            text=".", button_clicked=self.button_clicked, action="."),
                         ActionButton(
                             text="⌫", button_clicked=self.button_clicked, action="backspace"),
                         ActionButton(
                             text="=", button_clicked=self.button_clicked, action="calculate"),
+                    ]
+                ),
+                ft.Row(
+                    expand=True,
+                    controls=[
+                        ActionButton(
+                            text="10^x", button_clicked=self.button_clicked, action="10^x"
+                        ),
+                        ActionButton(
+                            text="√", button_clicked=self.button_clicked, action="√"),
+                        ActionButton(
+                            text="x^2", button_clicked=self.button_clicked, action="x^2"),
+                        ActionButton(
+                            text="x!", button_clicked=self.button_clicked, action="x!"),
                     ]
                 ),
             ]
@@ -169,6 +196,42 @@ class CalculatorApp(ft.Container):
             self.result.value = self.format_number(
                 self.calculate(
                     self.operand1, float(self.result.value), self.operator
+                )
+            )
+            self.reset()
+        elif action == "backspace":
+            self.result.value = self.result.value[:-1]
+            if self.result.value == "":
+                self.result.value = "0"    
+        elif action == ".":
+            if '.' not in self.result.value:
+                self.result.value += "."    
+        elif action == "10^x":
+            term = 1
+            time = int(self.result.value)
+            while(time > 0): 
+                term *= 10
+                time -= 1
+            self.result.value = str(self.format_number(term))
+            self.reset()
+        elif action == "√":
+            self.result.value = str(
+                self.format_number(
+                    math.sqrt(float(self.result.value))
+                )
+            )
+            self.reset()
+        elif action == "x^2":
+            a = float(self.result.value)
+            a *= a
+            self.result.value = str(
+                self.format_number(a)
+            )
+            self.reset()
+        elif action == "x!":
+            self.result.value = str(
+                self.format_number(
+                    self.root()
                 )
             )
             self.reset()
